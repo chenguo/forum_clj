@@ -1,6 +1,7 @@
 (ns forum.routes
   (:use compojure.core
         forum.views)
+        ;db.db)
   (:require [compojure.route :as route]
             [compojure.handler :as handler]
             [compojure.response :as response]))
@@ -11,4 +12,5 @@
   (route/not-found "Page not found"))
 
 (def forum
-  (handler/site main-routes))
+  (-> ;(init-db)
+      (handler/site main-routes)))
