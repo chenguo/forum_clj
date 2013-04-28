@@ -1,0 +1,4 @@
+/* Login page */
+.login_box {width:20em; margin:auto}
+form input {margin:0.2em 0; text-align:center}
+form input.remember {margin:0.5em 0.5em}

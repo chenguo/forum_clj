@@ -1,46 +1,54 @@
 (ns forum.views
-  (:use [hiccup core page]))
+  (:use [hiccup core page])
+  (:require [forum.views.login :as login]
+            [forum.session :as session]
+            ))
 
-(defn index-title []
-  [:title "LOL Bros, LOL!!"])
-
-(defn header-common
-  "Generate common header"
-  [header-funcs]
+(def base-head
   [:head
-   (seq header-funcs)
-   (include-css "/css/common.css")])
+   (include-css "/css/forum.css")
+   (include-js "http://ajax.googleapis.com/ajax/libs/jquery/1.7.0/jquery.min.js")])
 
-(defn index-header
-  "Generate header of index page"
-  []
-  (header-common
-   [(index-title)
-    (include-css "/css/index.css")]))
-
-(defn body-common
-  "Common code for page body"
-  []
-  [:div.banner "LOL Bros LOL"])
-
-
-(defn index-body
-  "Forum index body"
-  []
+(def base-body
   [:body
-   (body-common)
-   [:div.login_box
-    [:form.login_form.container
-     [:input.field {:type "text" :size "16" :name "username"
-                    :value "username" :maxlength "32"}]
-     [:input.field {:type "password" :size "16" :name "password"
-                    :value "password" :maxlength "32"}]
-     [:input.button {:type "submit" :value "log in"}]
-     [:br]]]])
+   [:div.banner "LOL Bros LOL"]])
 
-(defn index-page
-  "Generate index page"
-  []
+;; (defn view-login
+;;   "Render login page."
+;;   [ajax?]
+;;   (if ajax?
+;;     false
+;;     (let [[head body] (login/render)]
+;;       (println "send login page")
+;;       {:body (html5
+;;               (conj head (base-head))
+;;               (conj (base-body) body))
+;;        :session {}})))
+
+
+(def login login/generate)
+(defn fake
+  [query]
+  {:page "forum"
+   :title "forum"
+   :body "hi"})
+
+
+(defn construct-head
+  [js-files css-files title]
+  (let [js (map include-js js-files)
+        css (map include-css css-files)]
+    (conj base-head [:title title] css js)))
+
+(defn construct-body
+  [body]
+  (conj base-body body))
+
+(defn render
+  [{js :js css :css title :title body :body}]
   (html5
-   (index-header)
-   (index-body)))
+   (construct-head js css title)
+   (construct-body body)))
+
+
+
