@@ -4,7 +4,6 @@ var forum = new function() {
   }
 
   this.loadScript = function(jsFile) {
-    jsFile = '/js/common.js';
     var loaded = false;
     $('script').each(function(idx, script) {
       var a = script;

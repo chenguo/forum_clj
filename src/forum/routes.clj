@@ -15,18 +15,19 @@
 (defn- is-ajax?
   "Check if a request was AJAX"
   [req-headers]
-  (println "headers:" req-headers "req-with:" (get req-headers "x-requested-with"))
   (let [req-type (or (get req-headers "x-requested-with") "")]
     (= 0 (compare (.toLowerCase req-type) "xmlhttprequest"))))
 
 (defn- resp-ajax
   [content session]
+  (println "resp ajax" session)
   {:headers {"Content-Type" "application/json"}
    :body (json/json-str (assoc content :body (html (:body content))))
    :session session})
 
 (defn- resp-http
   [content session]
+  (println "resp http" session)
   {:headers {"Content-Type" "text/html"}
    :body (view/render content)
    :session session})
