@@ -35,8 +35,6 @@
   "Generate response to incoming request, based on route, query, and whether
    or not the request was AJAX"
   [session ajax? content]
-  (println "ajax:" ajax?)
-  (println "resp:" content)
   (if ajax?
     (resp-ajax content session)
     (resp-http content session)))
