@@ -4,31 +4,22 @@
     var user = $("input[name='username']")[0];
     var pw = $("input[name='password']")[0];
     var path = $(location).attr('pathname');
-    var query = $(location).attr('search').replace(/^\?/,'');
 
-    var test = $.md5(pw.value);
-
-    if (query != '') query += '&';
-    query += 'login-user='+user.value+'&login-pw='+$.md5(pw.value);
-
-    $.ajax({
-      url : path,
-      type : 'GET',
-      data : query,
-      success : loginResp
-    });
+    var query = { 'login-user': user.value,
+                  'login-pw': $.md5(pw.value) };
+    forum.loadPage(path, query, loginResp);
   }
 
-  var loginResp = function(resp, status, jqXHR) {
+  var loginResp = function(resp) {
     if (resp.page == 'login') {
       $('label#notification').html('Login failed, please try again')
         .css('display', 'inherit');
-    } else {
-      forum.updatePage(resp);
     }
   }
 
-  $(document).ready(function() {
+  var init = function() {
+    forum.setPage('login');
+
     // Check the remember me box by default
     $('input#remember').prop('checked', true);
     $('button#signin').click(login);
@@ -38,5 +29,11 @@
       if (key.keyCode == 13 && !key.altKey && !key.ctrlKey)
         login();
     });
-  });
+  }
+
+  if ($(document)[0].readyState != 'loading')
+    init();
+  else
+    $(document).ready(init);
+
 }) ();

@@ -1,4 +1,5 @@
-(ns forum.views.login)
+(ns forum.views.login
+  (:use [forum.defines :as def]))
 
 (defn- generate-body
   "Forum index body"
@@ -19,9 +20,9 @@
 (defn generate
   "Render login page"
   [query session]
-  {:page "login"
-   :css (list "/css/login.css")
-   :js (list "/js/jquery.md5.js"
-             "/js/login.js")
-   :title "login"
+  {:page def/page-login
+   :css (list def/css-login)
+   :js (list def/js-md5
+             def/js-login)
+   :title def/page-login-title
    :body (generate-body)})

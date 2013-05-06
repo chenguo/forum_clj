@@ -18,42 +18,51 @@
   (let [req-type (or (get req-headers "x-requested-with") "")]
     (= 0 (compare (.toLowerCase req-type) "xmlhttprequest"))))
 
-(defn- resp-ajax
-  [content session]
-  (println "resp ajax" session)
-  {:headers {"Content-Type" "application/json"}
-   :body (json/json-str (assoc content :body (html (:body content))))
-   :session session})
+(defn- add-widgets
+  [content widgets?]
+  (if (or (= nil widgets?)
+          (= 0 (compare "false" widgets?)))
+    (assoc content :widgets view/widgets)
+    content))
 
-(defn- resp-http
-  [content session]
-  (println "resp http" session)
-  {:headers {"Content-Type" "text/html"}
-   :body (view/render content)
-   :session session})
-
-(defn- get-resp
-  "Generate response to incoming request, based on route, query, and whether
-   or not the request was AJAX"
-  [session ajax? content]
+(defn- resp-header
+  [ajax?]
   (if ajax?
-    (resp-ajax content session)
-    (resp-http content session)))
+    {"Content-Type" "application/json"}
+    {"Content-Type" "text/html"}))
+
+(defn- page-content
+  [query session view-handler]
+  (if (contains? session :user)
+    (view-handler query session)
+    (view/login query session)))
+
+(defn- resp-body
+  [query session ajax? view-handler]
+  (let [content (page-content query session view-handler)
+        widgets? (:widgets query)]
+    (println "Widgets" widgets? "ajax" ajax?)
+    (if ajax?
+      (let [content (add-widgets content widgets?)
+            content (assoc content :body (html (:body content)))]
+        (json/json-str content))
+      (view/render content))))
 
 (defn- render
   "Process incoming request. Serve login page if no user is logged in, otherwise
    serve requested page"
   [request view-handler]
-  ;(println "request: " request)
+  (println "request: " request)
   (let [session (:session request)
         query (walk/keywordize-keys (:query-params request))
         new-session (session/session-check session query)
         ajax? (is-ajax? (:headers request))
-        respond (partial get-resp new-session ajax?)]
+        headers (resp-header ajax?)
+        body (resp-body query new-session ajax? view-handler)]
     (println "Old session:" session "new session:" new-session)
-    (if (:user new-session)
-      (respond (view-handler query new-session))
-      (respond (view/login query new-session)))))
+    {:headers headers
+     :body body
+     :session new-session}))
 
 (defroutes main-routes
   (route/resources "/")

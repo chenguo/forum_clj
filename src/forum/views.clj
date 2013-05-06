@@ -1,26 +1,29 @@
 (ns forum.views
   (:use [hiccup core page])
-  (:require [forum.views.board :as board]
+  (:require [forum.defines :as def]
+            [forum.views.board :as board]
             [forum.views.login :as login]))
 
 (def base-head [:head])
 
 (def base-css
-  (list "/css/common.css"
-        "/css/bootstrap.min.css"))
+  (list def/css-common
+        def/css-bootstrap))
 
 (def base-js
-  (list "http://ajax.googleapis.com/ajax/libs/jquery/1.7.0/jquery.min.js"
-        "/js/bootstrap.min.js"
-        "/js/common.js"))
+  (list def/js-ajax
+        def/js-bootstrap
+        def/js-common))
 
 (def base-body
   [:body
-   [:div.banner "LOL Bros LOL"]])
+   [:div.banner def/banner]])
 
 (def login login/generate)
 (def board board/generate)
 (def thread-search board/generate-search)
+(def widgets {:sidebar (html [:div.sidebar])
+              :chat (html [:div.chat])})
 
 (defn- construct-head
   [js-files css-files title]
@@ -30,7 +33,7 @@
 
 (defn- construct-body
   [body]
-  (println "body" body)
+  ;(println "body" body)
   (conj base-body body))
 
 (defn render
