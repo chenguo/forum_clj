@@ -5,6 +5,10 @@
             [monger.query :as mq])
   (:import  [com.mongodb WriteConcern]))
 
+(def login-fields ["password" "secret" "uid" "display"])
+
+(def user-info-fields ["name" "signature" "karma" "avatar" "posts"])
+
 (defn- find-one
   [col query fields]
   (mc/find-one-as-map col query fields))
@@ -26,12 +30,16 @@
   "Check given user credentials against DB"
   [user]
   (let [query {:name {mo/$regex (str "^" user "$")  mo/$options "i"}}
-        fields ["password" "secret" "uid" "display"]
-        doc (find-one "users" query fields)]
+        doc (find-one "users" query login-fields)]
     {:pw (:password doc)
      :secret (:secret doc)
      :uid (:uid doc)
      :display (:display doc)}))
+
+(defn get-user-info
+  "Given user ID, get basic user infromation from DB"
+  [id]
+  (find-one "users" {:uid id} user-info-fields))
 
 (defn find-threads
   "Get a list of threads"
