@@ -2,7 +2,8 @@
   (:use [hiccup core page])
   (:require [forum.defines :as def]
             [forum.views.board :as board]
-            [forum.views.login :as login]))
+            [forum.views.login :as login]
+            [forum.views.thread :as thread]))
 
 (def base-head [:head])
 
@@ -21,6 +22,7 @@
 
 (def login login/generate)
 (def board board/generate)
+(def thread thread/generate)
 (def thread-search board/generate-search)
 (def widgets {:sidebar (html [:div.sidebar])
               :chat (html [:div.chat])})

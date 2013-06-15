@@ -18,8 +18,13 @@
 (def page-login "login")
 (def page-login-title "LOL Bros, LOL!")
 
-; Boards page
+; Threads page
 (def page-forum "forum")
 (def page-forum-title "LOL Bros, LOL!")
 
-(def thr-per-page 20)
+; Posts page
+(def page-thread "thread")
+(def page-thread-title "LOL Bros, LOL!")
+
+(def thr-visible 20)
+(def posts-visible 20)

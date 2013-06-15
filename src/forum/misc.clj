@@ -2,11 +2,10 @@
   (:require [clojure.data.json :as json]
             [forum.db :as db]))
 
-(defn thread-search
-  [query]
-  (let [results (db/thread-search query)]
-    (json/json-str results)))
+(defn make-link
+  [url text]
+  [:a.thr-link {:href url} text])
 
 (defn thread-link
-  [title tid]
-  [:a {:href (str "/posts?thread=" tid)} title])
+  ([title tid] (make-link (str "/thread?t=" tid) title))
+  ([title tid page] (make-link (str "/thread?t=" tid "&p=" page) title)))

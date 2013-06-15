@@ -1,6 +1,12 @@
 var forum = new function() {
   this.page = null;
   this.widgets = false;
+  this.path = null;
+
+  $(window).on('popstate', function(e) {
+    var path = $(location).attr('pathname');
+    forum.loadPage(path, {}, function() {});
+  });
 
   this.signOut= function(){
 
@@ -23,25 +29,28 @@ var forum = new function() {
   };
 
   this.loadPage = function(path, query, cb) {
+    forum.path = path;
+    forum.setPageHistory();
+
     query.widgets = false;
     $.ajax({
       url : path,
       type : 'GET',
       data : query,
       success : function(resp) {
-        cb(resp);
+        if (cb) cb(resp);
         forum.updatePage(resp);
       }
     });
   };
 
   this.setPage = function(page) {
-    this.page = page;
+    forum.page = page;
   };
 
   this.updateWidgets = function(widgets) {
-    if (this.widgets == false) {
-      this.widgets = true;
+    if (forum.widgets == false) {
+      forum.widgets = true;
       for (var key in widgets) {
         var widget = widgets[key];
         var loaded = $('.' + key);
@@ -56,16 +65,35 @@ var forum = new function() {
     }
   };
 
+  this.setPageHistory = function(path) {
+    path = path || forum.path;
+    var pathname = $(location).attr('pathname');
+    if (path != pathname) {
+      forum.path = path
+      history.pushState(null, null, path);
+    }
+  };
+
+  this.setPageHistoryLogin = function() {
+    history.replaceState(null, null, 'login');
+  }
+
   this.updatePage = function(content) {
-    if (content.title && (typeof content.title) === 'string')
+    if (content.title
+        && (typeof content.title) == 'string'
+        && content.page
+        && content.body) {
+
+      if (content.page == 'login')
+        forum.setPageHistoryLogin();
       $(document).attr('title', content.title);
-    if (content.page)
       forum.setPage(content.page);
-    if (content.widgets)
-      forum.updateWidgets(content.widgets);
-    if (content.body)
       $('#page').replaceWith(content.body);
-    if (content.js)
-      content.js.map(forum.loadScript);
+
+      if (content.widgets)
+        forum.updateWidgets(content.widgets);
+      if (content.js)
+        content.js.map(forum.loadScript);
+    }
   }
 }

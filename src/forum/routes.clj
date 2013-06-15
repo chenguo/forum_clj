@@ -25,10 +25,12 @@
     (assoc content :widgets view/widgets)
     content))
 
+(def header-json {"Content-Type" "application/json"})
+
 (defn- resp-header
   [ajax?]
   (if ajax?
-    {"Content-Type" "application/json"}
+    header-json
     {"Content-Type" "text/html"}))
 
 (defn- page-content
@@ -41,7 +43,6 @@
   [query session ajax? view-handler]
   (let [content (page-content query session view-handler)
         widgets? (:widgets query)]
-    (println "Widgets" widgets? "ajax" ajax?)
     (if ajax?
       (let [content (add-widgets content widgets?)
             content (assoc content :body (html (:body content)))]
@@ -58,17 +59,32 @@
         new-session (session/session-check session query)
         ajax? (is-ajax? (:headers request))
         headers (resp-header ajax?)
+        query-str (:query-string request)
         body (resp-body query new-session ajax? view-handler)]
     (println "Old session:" session "new session:" new-session)
     {:headers headers
      :body body
      :session new-session}))
 
+(defn- login
+  [request]
+  (println "request: " request)
+  (let [new-session (session/session-check {} (:params request))
+        tmp (println "new session:" new-session)
+        body    (if (contains? new-session :user)
+                  "true"
+                  "false")]
+    {:header header-json
+     :body body
+     :session new-session}))
+
 (defroutes main-routes
   (route/resources "/")
   (GET "/" [:as request] (render request view/board))
-  (GET "/thread-search" [:as request] (render request view/thread-search))
+  (GET "/thread" [:as request] (render request view/thread))
   (GET "/login" [:as request] (render request view/login))
+  (GET "/thread-search" [:as request] (render request view/thread-search))
+  (POST "/login-action" [:as request] (login request))
   ;(GET "/thread-search" [query] (misc/thread-search query))
   (route/not-found "Page not found"))
 

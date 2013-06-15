@@ -25,7 +25,7 @@
 (defn login-info
   "Check given user credentials against DB"
   [user]
-  (let [query {:name {mo/$regex user mo/$options "i"}}
+  (let [query {:name {mo/$regex (str "^" user "$")  mo/$options "i"}}
         fields ["password" "secret" "uid" "display"]
         doc (find-one "users" query fields)]
     {:pw (:password doc)
@@ -35,17 +35,24 @@
 
 (defn find-threads
   "Get a list of threads"
-  [match thr-limit offset uid]
-  (let [search-regex (or match ".*")]
-    (mq/with-collection "threads"
-      (mq/find {:title {mo/$regex search-regex}})
-      (mq/fields [:tid :uid :create_time :title :orig_title :posts :views
-                  :last_uid :last_post (str "user_info." 2)])
-      (mq/sort (sorted-map :last_post -1))
-      (mq/limit thr-limit)
-      (mq/skip offset))))
+  [query thr-limit offset uid]
+  (mq/with-collection "threads"
+    (mq/find query)
+    (mq/fields [:tid :uid :create_time :title :orig_title :posts :views
+                :last_uid :last_post (str "user_info." 2)])
+    (mq/sort (sorted-map :last_post -1))
+    (mq/limit thr-limit)
+    (mq/skip offset)))
 
-(defn thread-search
-  "Regex search for threads matching query"
+(defn find-posts
+  "Get a list of posts"
+  [query post-limit offset uid]
+  (mq/with-collection "posts"
+    (mq/find query)
+    (mq/sort (sorted-map :time 1))
+    (mq/limit post-limit)
+    (mq/skip offset)))
+
+(defn build-query-regex
   [query]
-  (find-mult "threads" {:title {mo/$regex query}} {"title" 1 "tid" 1 "_id" 0}))
+  {mo/$regex query})

@@ -14,9 +14,17 @@
   var searchUpdate = function(resp) {
     if (resp.body)
       $('div.threadlist').replaceWith(resp.body);
+    clearInterval(updater);
   };
 
+  var viewThread = function(event, b, c) {
+    if (event) event.preventDefault();
+    var link = event.target.href;
+    forum.loadPage(link, {}, null);
+  }
+
   var init = function() {
+    // Setup thread search
     var searcher = $('input#search');
     searcher.val('');
     searcher.keyup(function(e) {
@@ -26,6 +34,9 @@
         updater = setInterval(updateThreads, 500);
       }
     });
+
+    // Setup handlers for thread links
+    $('.thr-link').click(viewThread)
   }
 
   if ($(document)[0].readyState != 'loading')
